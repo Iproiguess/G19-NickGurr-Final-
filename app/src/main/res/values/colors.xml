@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary color -->
+    <color name="colorPrimary">#6200EE</color> <!-- Purple color (can be changed) -->
+    <color name="colorPrimaryDark">#3700B3</color> <!-- Darker purple -->
+    <color name="colorAccent">#03DAC5</color> <!-- Accent color (Teal) -->
+
+    <!-- Text colors -->
+    <color name="textColorPrimary">#000000</color> <!-- Black -->
+    <color name="textColorSecondary">#FFFFFF</color> <!-- White -->
+
+
+    <color name="splashBackground">#A8E6CF</color> <!-- warm orange -->
+    <color name="nothing">#F5F5F5</color>
+
+    <!-- Background colors -->
+    <color name="backgroundColor">#F5F5F5</color> <!-- Light gray background -->
+    <color name="toolbarColor">#6200EE</color> <!-- Matching toolbar color with the primary color -->
+</resources>

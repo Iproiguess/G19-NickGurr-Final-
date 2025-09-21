@@ -1,0 +1,27 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Primary and accent colors -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorSecondary">@color/textColorSecondary</item>
+
+        <!-- Window background -->
+        <item name="android:windowBackground">@color/backgroundColor</item>
+
+        <!-- Toolbar styling -->
+        <item name="android:toolbarStyle">@style/ToolbarStyle</item>
+    </style>
+
+    <!-- Custom Toolbar style -->
+    <style name="ToolbarStyle">
+        <item name="android:background">@color/toolbarColor</item>
+        <item name="android:titleTextColor">@android:color/white</item> <!-- White title color -->
+    </style>
+
+    <!-- Button, EditText, and other elements styles can go here -->
+</resources>

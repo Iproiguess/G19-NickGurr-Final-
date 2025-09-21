@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AboutActivity">
+
+    <!-- TextView to display information about UniteFund -->
+    <TextView
+        android:id="@+id/aboutText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="UniteFund is a global leader in fundraising platforms, dedicated to using innovative technology to help organizations, social enterprises, and individuals raise funds."
+        android:textSize="16sp"
+        android:textColor="#333333"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"/>
+
+    <!-- TextView for Email -->
+    <TextView
+        android:id="@+id/contactEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Contact Us: support@unitefund.com"
+        android:textSize="14sp"
+        android:textColor="#1E88E5"
+        app:layout_constraintTop_toBottomOf="@+id/aboutText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
+
+    <!-- TextView for Phone Number -->
+    <TextView
+        android:id="@+id/contactPhone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Phone: +1-800-123-4567"
+        android:textSize="14sp"
+        android:textColor="#1E88E5"
+        app:layout_constraintTop_toBottomOf="@+id/contactEmail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnBackToAccountSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="32dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

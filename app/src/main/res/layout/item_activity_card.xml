@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="8dp"
+    android:layout_marginBottom="12dp"
+    android:elevation="4dp"
+    android:padding="12dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Activity Title -->
+        <TextView
+            android:id="@+id/tvActivityTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Activity Title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageActivity"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Activity Introduction -->
+        <TextView
+            android:id="@+id/tvActivityDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Brief description goes here."
+            android:textSize="14sp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            app:layout_constraintTop_toBottomOf="@id/tvActivityTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageActivity"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Location -->
+        <TextView
+            android:id="@+id/tvActivityLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Location: Downtown"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/tvActivityDescription"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Date -->
+        <TextView
+            android:id="@+id/tvActivityDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date: 2025-09-20"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/tvActivityLocation"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progressBarActivity"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:max="100"
+            android:progress="50"
+            android:progressTint="@android:color/holo_blue_dark"
+            android:backgroundTint="@android:color/darker_gray"
+            app:layout_constraintTop_toBottomOf="@id/tvActivityDate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageActivity"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Progress Text -->
+        <TextView
+            android:id="@+id/tvProgressText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RM500 / RM1000"
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/progressBarActivity"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Activity Status -->
+        <TextView
+            android:id="@+id/tvActivityStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ongoing"
+            android:textSize="12sp"
+            android:textColor="#4CAF50"
+            app:layout_constraintTop_toBottomOf="@id/tvProgressText"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Image for Activity -->
+        <ImageView
+            android:id="@+id/imageActivity"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_foreground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
