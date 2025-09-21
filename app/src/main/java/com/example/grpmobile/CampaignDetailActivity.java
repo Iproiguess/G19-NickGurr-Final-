@@ -1,15 +1,17 @@
 package com.example.grpmobile;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View; // Added for View.OnClickListener
 import android.widget.Button;
-import android.widget.EditText;
+// REMOVED: import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+// REMOVED: import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,14 +29,14 @@ public class CampaignDetailActivity extends AppCompatActivity {
     private TextView tvCampaignDetailLocation;
     private TextView tvCampaignDetailDate;
     private TextView tvCampaignDetailDonationGoal;
-    private ProgressBar pbCampaignDetailProgress;
     private Button btnBack;
 
-    private EditText etDonorName, etDonorContact, etDonationAmount;
+    // private EditText etDonorName, etDonorContact, etDonationAmount;
     private Button btnDonate;
 
     private double currentDonation;
     private double targetDonation;
+    private String campaignPaypalUrl;
 
     private static final String TAG = "CampaignDetailActivity";
 
@@ -58,12 +60,8 @@ public class CampaignDetailActivity extends AppCompatActivity {
         tvCampaignDetailLocation = findViewById(R.id.tvCampaignDetailLocation);
         tvCampaignDetailDate = findViewById(R.id.tvCampaignDetailDate);
         tvCampaignDetailDonationGoal = findViewById(R.id.tvCampaignDetailDonationGoal);
-        pbCampaignDetailProgress = findViewById(R.id.pbCampaignDetailProgress);
         btnBack = findViewById(R.id.btnBack);
 
-        etDonorName = findViewById(R.id.etDonorName);
-        etDonorContact = findViewById(R.id.etDonorContact);
-        etDonationAmount = findViewById(R.id.etDonationAmount);
         btnDonate = findViewById(R.id.btnDonate);
 
         Intent intent = getIntent();
@@ -73,6 +71,7 @@ public class CampaignDetailActivity extends AppCompatActivity {
             String location = intent.getStringExtra("location");
             String date = intent.getStringExtra("date");
             String imageUriString = intent.getStringExtra("imageUriString");
+            campaignPaypalUrl = intent.getStringExtra("paypalUrl");
             int imageResId = intent.getIntExtra("imageResId", 0);
             currentDonation = intent.getDoubleExtra("currentDonation", 0.0);
             targetDonation = intent.getDoubleExtra("targetDonation", 0.0);
@@ -82,9 +81,8 @@ public class CampaignDetailActivity extends AppCompatActivity {
             tvCampaignDetailLocation.setText(location);
             tvCampaignDetailDate.setText(date);
 
-            updateDonationUI();
+            updateDonationUI(); // Call this to set donation goal text
 
-            // Image loading logic
             if (!TextUtils.isEmpty(imageUriString)) {
                 try {
                     Uri imageUri = Uri.parse(imageUriString);
@@ -113,73 +111,39 @@ public class CampaignDetailActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        btnDonate.setOnClickListener(v -> handleDonation());
+        // MODIFIED: OnClickListener for btnDonate - simplified
+        btnDonate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (campaignPaypalUrl != null && !campaignPaypalUrl.trim().isEmpty()) {
+                    String url = campaignPaypalUrl.trim();
+                    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                        url = "https://" + url;
+                    }
+                    try {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(browserIntent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Could not open PayPal URL: " + url, e);
+                        Toast.makeText(CampaignDetailActivity.this, "Invalid donation link.", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(CampaignDetailActivity.this, "No donation link available for this campaign.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
+    @SuppressLint("SetTextI18n")
     private void updateDonationUI() {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ms", "MY"));
-        String formattedCurrentDonation = currencyFormat.format(currentDonation);
+        String formattedCurrentDonation = currencyFormat.format(currentDonation); // Still needed if showing current/target
         String formattedTargetDonation = currencyFormat.format(targetDonation);
 
-        tvCampaignDetailDonationGoal.setText(
-                String.format(Locale.getDefault(),
-                        "Goal: %s / %s",
-                        formattedCurrentDonation,
-                        formattedTargetDonation));
-
-        if (targetDonation > 0) {
-            int progress = (int) ((currentDonation / targetDonation) * 100);
-            pbCampaignDetailProgress.setProgress(Math.min(progress, 100));
-        } else {
-            pbCampaignDetailProgress.setProgress(0);
-        }
+        // If you want only target: tvCampaignDetailDonationGoal.setText("Goal: " + formattedTargetDonation);
+        tvCampaignDetailDonationGoal.setText("Goal: " + formattedTargetDonation);
     }
 
-    private void handleDonation() {
-        String name = etDonorName.getText().toString().trim();
-        String contact = etDonorContact.getText().toString().trim();
-        String amountStr = etDonationAmount.getText().toString().trim();
-
-        if (TextUtils.isEmpty(name)) {
-            Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(contact)) {
-            Toast.makeText(this, "Please enter your contact number", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (TextUtils.isEmpty(amountStr)) {
-            Toast.makeText(this, "Please enter donation amount", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        double donationAmount;
-        try {
-            donationAmount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Invalid donation amount", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (donationAmount <= 0) {
-            Toast.makeText(this, "Donation must be greater than RM 0", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Update donation total
-        currentDonation += donationAmount;
-        updateDonationUI();
-
-        String msg = String.format(Locale.getDefault(),
-                "Thank you %s!\nDonation: RM%.2f\nContact: %s",
-                name, donationAmount, contact);
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-
-        // Clear inputs
-        etDonorName.setText("");
-        etDonorContact.setText("");
-        etDonationAmount.setText("");
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -190,3 +154,4 @@ public class CampaignDetailActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+

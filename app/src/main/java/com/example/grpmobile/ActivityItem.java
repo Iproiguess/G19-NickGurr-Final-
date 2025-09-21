@@ -1,40 +1,46 @@
 package com.example.grpmobile;
 
+// No special Android imports needed for this POJO unless using Parcelable
+
 public class ActivityItem {
+    // Existing fields based on ActivityAdapter usage
     private String title;
     private String description;
     private String location;
     private String date;
     private String status;
-    private int imageResId;          // For drawable resources (like default images)
-    private String imageUriString;   // New: For URI of uploaded images (can be null)
-    private int currentDonation;
-    private double targetDonation;     // Changed from int to double
+    private String imageUriString; // For URI from database/gallery
+    private int imageResId;      // For drawable resource ID (e.g., local placeholders)
+    private double currentDonation;
+    private double targetDonation;
+    // int donationProgress; // This can be calculated, or stored if fetched directly
 
-    // Constructor to handle both imageResId (for defaults/placeholders) and imageUriString
-    public ActivityItem(String title, String description, String location, String date,
-                        String status, int imageResId, String imageUriString,
-                        int currentDonation, double targetDonation) {
+    // New fields
+    private String contactEmail;
+    private String paypalUrl;
+
+    // Constructor
+    public ActivityItem(String title, String description, String location, String date, String status,
+                        String imageUriString, int imageResId,
+                        double currentDonation, double targetDonation,
+                        String contactEmail, String paypalUrl) {
         this.title = title;
         this.description = description;
         this.location = location;
         this.date = date;
         this.status = status;
-        this.imageResId = imageResId;
         this.imageUriString = imageUriString;
+        this.imageResId = imageResId;
         this.currentDonation = currentDonation;
         this.targetDonation = targetDonation;
+        // this.donationProgress = calculateProgress(currentDonation, targetDonation);
+
+        // Initialize new fields
+        this.contactEmail = contactEmail;
+        this.paypalUrl = paypalUrl;
     }
 
-    // Overloaded constructor for cases where only imageResId is provided (e.g., old sample data)
-    // Or when an uploaded image is not available and we must use a resource ID.
-    public ActivityItem(String title, String description, String location, String date,
-                        String status, int imageResId, int currentDonation, double targetDonation) {
-        this(title, description, location, date, status, imageResId, null, currentDonation, targetDonation);
-    }
-
-
-    // Getter methods
+    // Getters for all fields
     public String getTitle() {
         return title;
     }
@@ -55,63 +61,51 @@ public class ActivityItem {
         return status;
     }
 
+    public String getImageUriString() {
+        return imageUriString;
+    }
+
     public int getImageResId() {
         return imageResId;
     }
 
-    public String getImageUriString() { // New getter
-        return imageUriString;
-    }
-
-    public int getCurrentDonation() {
+    public double getCurrentDonation() {
         return currentDonation;
     }
 
-    public double getTargetDonation() { // Return type changed to double
+    public double getTargetDonation() {
         return targetDonation;
     }
 
-    // Setter methods
+    // Getter for donationProgress - can be calculated on the fly
+    public int getDonationProgress() {
+        if (targetDonation <= 0) {
+            return 0;
+        }
+        double progress = (currentDonation / targetDonation) * 100;
+        return (int) Math.min(progress, 100); // Cap at 100
+    }
+
+    // Getters for new fields
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public String getPaypalUrl() {
+        return paypalUrl;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setImageResId(int imageResId) {
-        this.imageResId = imageResId;
-    }
-
-    public void setImageUriString(String imageUriString) { // New setter
-        this.imageUriString = imageUriString;
-    }
-
-    public void setCurrentDonation(int currentDonation) {
-        this.currentDonation = currentDonation;
-    }
-
-    public void setTargetDonation(double targetDonation) { // Parameter type changed to double
-        this.targetDonation = targetDonation;
-    }
-
-    public int getDonationProgress() {
-        if (targetDonation == 0) {
-            return 0;
-        }
-        return (int) ((double) currentDonation / targetDonation * 100);
-    }
+    // Helper method to calculate progress (if not storing it directly)
+    // private int calculateProgress(double current, double target) {
+    //     if (target <= 0) {
+    //         return 0;
+    //     }
+    //     double progress = (current / target) * 100;
+    //     return (int) Math.min(progress, 100); // Cap at 100
+    // }
 }

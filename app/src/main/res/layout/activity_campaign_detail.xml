@@ -97,64 +97,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:text="Goal: RM0 / RM1000"
-            android:layout_marginBottom="4dp" />
-
-        <!-- Progress -->
-        <ProgressBar
-            android:id="@+id/pbCampaignDetailProgress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="50"
+            android:text="Goal: RM1000"
             android:layout_marginBottom="16dp" />
+        <!-- Increased margin bottom as ProgressBar was removed -->
 
-        <!-- Donation Form -->
         <LinearLayout
             android:id="@+id/layoutDonationForm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp"
-            android:background="@android:color/darker_gray"
             android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Make a Donation"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                android:layout_marginBottom="8dp" />
-
-            <EditText
-                android:id="@+id/etDonorName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Your Name"
-                android:inputType="textPersonName"
-                android:layout_marginBottom="8dp" />
-
-            <EditText
-                android:id="@+id/etDonorContact"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Contact Number"
-                android:inputType="phone"
-                android:layout_marginBottom="8dp" />
-
-            <EditText
-                android:id="@+id/etDonationAmount"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Donation Amount (RM)"
-                android:inputType="numberDecimal"
-                android:layout_marginBottom="12dp" />
 
             <Button
                 android:id="@+id/btnDonate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:text="Donate" />
         </LinearLayout>
 
@@ -163,7 +121,7 @@
             android:id="@+id/btnBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            android:layout_gravity="center_horizontal"
             android:text="Back" />
     </LinearLayout>
 </ScrollView>

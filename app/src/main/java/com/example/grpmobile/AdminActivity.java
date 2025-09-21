@@ -27,7 +27,7 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
     private TextView tvNoPendingCampaigns;
     private TextView textViewAdminBack;
     private CircleImageView profileImageViewAdmin;
-    private String currentAdminUsername; // Added to store the admin username
+    private String currentAdminUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +35,11 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
         setContentView(R.layout.activity_admin);
         Log.d(TAG, "onCreate called");
 
-        // Retrieve the admin username passed with the key "USERNAME"
         currentAdminUsername = getIntent().getStringExtra("USERNAME");
         if (currentAdminUsername == null || currentAdminUsername.isEmpty()) {
             Log.e(TAG, "Username not passed (expected key 'USERNAME')! Using fallback.");
             Toast.makeText(this, "Error: Admin user data not loaded.", Toast.LENGTH_LONG).show();
-            // Consider finishing the activity if the username is critical and not available
-            // finish();
+            // finish(); // Consider finishing if critical
             // return;
         } else {
             Log.d(TAG, "Admin username received (key 'USERNAME'): " + currentAdminUsername);
@@ -55,9 +53,8 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
         textViewAdminBack = findViewById(R.id.textViewAdminBack);
         profileImageViewAdmin = findViewById(R.id.profileImageViewAdmin);
 
-        // Set the default profile picture
         if (profileImageViewAdmin != null) {
-            profileImageViewAdmin.setImageResource(R.drawable.ic_launcher_background); // Set default image
+            profileImageViewAdmin.setImageResource(R.drawable.ic_launcher_background);
         }
 
         recyclerViewCampaignReviews.setLayoutManager(new LinearLayoutManager(this));
@@ -67,7 +64,6 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
         if (textViewAdminBack != null) {
             textViewAdminBack.setOnClickListener(v -> {
                 Intent intent = new Intent(AdminActivity.this, UserActivity.class);
-                // Pass the username to UserActivity if needed, though it might get its own from login
                 intent.putExtra("USERNAME", currentAdminUsername);
                 intent.putExtra("IS_ADMIN", true);
                 startActivity(intent);
@@ -77,17 +73,15 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
 
         if (profileImageViewAdmin != null) {
             profileImageViewAdmin.setOnClickListener(v -> {
-                String usernameToPass;
-                if (currentAdminUsername != null && !currentAdminUsername.isEmpty()) {
-                    usernameToPass = currentAdminUsername;
-                } else {
+                String usernameToPass = currentAdminUsername;
+                if (usernameToPass == null || usernameToPass.isEmpty()) {
                     Log.w(TAG, "Admin username is null/empty when PFP clicked. Cannot proceed.");
                     Toast.makeText(AdminActivity.this, "Cannot load profile: User ID missing.", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Intent intent = new Intent(AdminActivity.this, AccountSettingsActivity.class);
                 intent.putExtra("USERNAME", usernameToPass);
-                intent.putExtra("IS_ADMIN", true); // <<< ADD THIS LINE
+                intent.putExtra("IS_ADMIN", true);
                 startActivity(intent);
             });
         }
@@ -97,8 +91,8 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume: Calling logAllCampaigns from DBHelper and loading pending campaigns.");
-        if (dbHelper != null) { // Check if dbHelper is initialized
-            dbHelper.logAllCampaigns();
+        if (dbHelper != null) {
+            // dbHelper.logAllCampaigns(); // You might want to ensure this logs both email and paypalUrl
             loadPendingCampaignsFromDb();
         }
     }
@@ -109,6 +103,8 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
         Cursor cursor = null;
 
         try {
+            // Ensure dbHelper.getPendingCampaigns() returns a cursor that includes
+            // both COLUMN_CAMPAIGN_CONTACT_EMAIL and COLUMN_CAMPAIGN_PAYPAL_URL
             cursor = dbHelper.getPendingCampaigns();
             if (cursor != null) {
                 Log.d(TAG, "loadPendingCampaignsFromDb: Cursor count: " + cursor.getCount());
@@ -121,12 +117,19 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
                         String date = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DATE));
                         String imageUri = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_IMAGE_URI));
                         String submitter = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_SUBMITTER_USERNAME));
+
+                        // MODIFIED: Fetch both contactEmail and paypalUrl
+                        // Ensure these columns exist in your DBHelper.TABLE_CAMPAIGNS and are selected by getPendingCampaigns()
                         String contactEmail = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_CONTACT_EMAIL));
+                        String paypalUrl = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_PAYPAL_URL));
+
                         double donationGoal = cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DONATION_GOAL));
                         String status = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_STATUS));
 
+                        // MODIFIED: Assuming CampaignReviewItem constructor now accepts both contactEmail and paypalUrl
+                        // The order of contactEmail and paypalUrl here must match your CampaignReviewItem constructor.
                         pendingCampaignsList.add(new CampaignReviewItem(id, title, description, location, date,
-                                imageUri, submitter, contactEmail, donationGoal, status));
+                                imageUri, submitter, contactEmail, paypalUrl, donationGoal, status));
                     } while (cursor.moveToNext());
                 }
             } else {
@@ -134,6 +137,8 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
             }
         } catch (Exception e) {
             Log.e(TAG, "loadPendingCampaignsFromDb: Exception while processing cursor.", e);
+            // Example: If a column is missing, an IllegalArgumentException ("column ... does not exist") will be thrown here.
+            Toast.makeText(this, "Error loading campaign data. Columns might be missing.", Toast.LENGTH_LONG).show();
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
@@ -182,5 +187,29 @@ public class AdminActivity extends AppCompatActivity implements CampaignReviewAd
         } else {
             Toast.makeText(this, "Failed to reject campaign: " + campaign.getTitle(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // ADDED: Implementation for onViewDetails from OnCampaignActionListener
+    @Override
+    public void onViewDetails(CampaignReviewItem campaign) {
+        Log.d(TAG, "onViewDetails called for campaign: " + campaign.getTitle());
+        Intent intent = new Intent(this, CampaignDetailActivity.class);
+        intent.putExtra("title", campaign.getTitle());
+        intent.putExtra("description", campaign.getDescription());
+        intent.putExtra("location", campaign.getLocation());
+        intent.putExtra("date", campaign.getDate());
+        intent.putExtra("imageUriString", campaign.getImageUriString());
+
+        // ADDED: Pass both contactEmail and paypalUrl
+        // Ensure CampaignReviewItem has getContactEmail() and getPaypalUrl()
+        intent.putExtra("contactEmail", campaign.getContactEmail());
+        intent.putExtra("paypalUrl", campaign.getPaypalUrl());
+
+        intent.putExtra("targetDonation", campaign.getDonationGoal());
+        // You might also want to pass current donations if CampaignReviewItem holds it
+        // intent.putExtra("currentDonation", campaign.getCurrentDonationAmount());
+        // Pass any other necessary details
+
+        startActivity(intent);
     }
 }

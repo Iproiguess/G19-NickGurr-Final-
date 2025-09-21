@@ -23,10 +23,11 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
     public interface OnCampaignActionListener {
         void onApprove(CampaignReviewItem campaign, int position);
         void onReject(CampaignReviewItem campaign, int position);
+        void onViewDetails(CampaignReviewItem campaign);
     }
 
     public CampaignReviewAdapter(List<CampaignReviewItem> campaignReviewList, OnCampaignActionListener listener) {
-        this.campaignReviewList = campaignReviewList; // This list is shared with AdminActivity
+        this.campaignReviewList = campaignReviewList;
         this.listener = listener;
     }
 
@@ -44,13 +45,32 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
 
         Log.d("CampaignReviewAdapter", "Binding campaign ID: " + currentCampaign.getId() + " at position " + position);
         Log.d("CampaignReviewAdapter", "Title: '" + currentCampaign.getTitle() + "'");
-        Log.d("CampaignReviewAdapter", "Email: '" + currentCampaign.getContactEmail() + "'");
+        Log.d("CampaignReviewAdapter", "Contact Email: '" + currentCampaign.getContactEmail() + "'");
+        Log.d("CampaignReviewAdapter", "PayPal URL: '" + currentCampaign.getPaypalUrl() + "'");
         Log.d("CampaignReviewAdapter", "Description: '" + currentCampaign.getDescription() + "'");
-        Log.d("CampaignReviewAdapter", "Image URI: '" + currentCampaign.getImageUriString() + "'");
-        Log.d("CampaignReviewAdapter", "Donation Goal: " + currentCampaign.getDonationGoal());
+
 
         holder.tvCampaignTitle.setText(currentCampaign.getTitle());
-        holder.tvContactEmail.setText(currentCampaign.getContactEmail());
+
+        String contactEmail = currentCampaign.getContactEmail();
+        if (contactEmail != null && !contactEmail.isEmpty()) {
+            holder.tvContactEmail.setText("Email: " + contactEmail);
+            holder.tvContactEmail.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvContactEmail.setText("Email: N/A");
+        }
+
+        String paypalUrl = currentCampaign.getPaypalUrl();
+        if (holder.tvPaypalUrl != null) {
+            if (paypalUrl != null && !paypalUrl.isEmpty()) {
+                holder.tvPaypalUrl.setText("PayPal: " + paypalUrl);
+                holder.tvPaypalUrl.setVisibility(View.VISIBLE);
+            } else {
+                holder.tvPaypalUrl.setText("PayPal: N/A");
+            }
+        }
+
+
         holder.tvCampaignDescription.setText(currentCampaign.getDescription());
 
         String imageUriString = currentCampaign.getImageUriString();
@@ -61,16 +81,18 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
                 holder.ivCampaignImage.setVisibility(View.VISIBLE);
             } catch (Exception e) {
                 Log.e("CampaignReviewAdapter", "Error loading image URI: " + imageUriString, e);
-                holder.ivCampaignImage.setImageResource(R.drawable.ic_launcher_background); // Fallback
+                holder.ivCampaignImage.setImageResource(R.drawable.ic_launcher_background);
                 holder.ivCampaignImage.setVisibility(View.VISIBLE);
             }
         } else {
-            holder.ivCampaignImage.setImageResource(R.drawable.ic_launcher_background); // Default
+            holder.ivCampaignImage.setImageResource(R.drawable.ic_launcher_background);
             holder.ivCampaignImage.setVisibility(View.VISIBLE);
         }
 
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+        // MODIFIED: Changed Locale for NumberFormat to display RM
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ms", "MY"));
         String formattedGoal = currencyFormat.format(currentCampaign.getDonationGoal());
+        // The prefix "Goal: " is still here. NumberFormat should handle the "RM"
         holder.tvDonationGoal.setText("Goal: " + formattedGoal);
 
         holder.btnApprove.setOnClickListener(v -> {
@@ -84,6 +106,12 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
                 listener.onReject(currentCampaign, holder.getAdapterPosition());
             }
         });
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onViewDetails(currentCampaign);
+            }
+        });
     }
 
     @Override
@@ -91,22 +119,10 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
         return campaignReviewList == null ? 0 : campaignReviewList.size();
     }
 
-    // Corrected method to update the list
     public void updateList(List<CampaignReviewItem> newList) {
-        // In the current setup, AdminActivity modifies the list instance that
-        // this.campaignReviewList already points to.
-        // So, this.campaignReviewList is already up-to-date when this method is called.
-        // We just need to notify the adapter that the data has changed.
-        // The check 'this.campaignReviewList != newList' handles cases where AdminActivity
-        // might pass a completely new list instance in the future.
         if (this.campaignReviewList != newList) {
-            // This case should ideally not happen with the current AdminActivity setup
-            // where it passes the same list instance it holds.
-            // If it does, we switch the adapter's reference to this new list.
-            Log.d("CampaignReviewAdapter", "updateList: New list instance received. Switching reference.");
             this.campaignReviewList = newList;
         }
-        Log.d("CampaignReviewAdapter", "updateList: Notifying dataset changed. List size: " + (this.campaignReviewList != null ? this.campaignReviewList.size() : 0));
         notifyDataSetChanged();
     }
 
@@ -126,6 +142,7 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
         TextView tvDonationGoal;
         Button btnApprove;
         Button btnReject;
+        TextView tvPaypalUrl;
 
         public CampaignReviewViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -136,6 +153,7 @@ public class CampaignReviewAdapter extends RecyclerView.Adapter<CampaignReviewAd
             tvDonationGoal = itemView.findViewById(R.id.tvItemDonationGoal);
             btnApprove = itemView.findViewById(R.id.btnApproveCampaign);
             btnReject = itemView.findViewById(R.id.btnRejectCampaign);
+            tvPaypalUrl = itemView.findViewById(R.id.tvItemPaypalUrl);
         }
     }
 }

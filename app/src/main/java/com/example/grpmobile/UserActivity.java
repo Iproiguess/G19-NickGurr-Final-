@@ -33,7 +33,7 @@ public class UserActivity extends AppCompatActivity implements ActivityAdapter.O
 
     // Added fields to store user information
     private String currentUsername;
-    private String currentUserEmail;
+    private String currentUserEmail; // User's login email, not campaign contact email
 
     // Optional: If you have a TextView for a welcome message
     // private TextView tvWelcomeUser;
@@ -59,7 +59,7 @@ public class UserActivity extends AppCompatActivity implements ActivityAdapter.O
 
         // Log the received values to help with debugging
         Log.d("UserActivity", "Received USERNAME: " + currentUsername);
-        Log.d("UserActivity", "Received USER_EMAIL: " + currentUserEmail);
+        Log.d("UserActivity", "Received USER_EMAIL (login email): " + currentUserEmail);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -77,7 +77,7 @@ public class UserActivity extends AppCompatActivity implements ActivityAdapter.O
                     Intent accountSettingsIntent = new Intent(UserActivity.this, AccountSettingsActivity.class);
                     // Pass the username and email to AccountSettingsActivity
                     accountSettingsIntent.putExtra("USERNAME", currentUsername);
-                    accountSettingsIntent.putExtra("USER_EMAIL", currentUserEmail);
+                    accountSettingsIntent.putExtra("USER_EMAIL", currentUserEmail); // User's login email
                     startActivity(accountSettingsIntent);
                 }
             });
@@ -114,34 +114,53 @@ public class UserActivity extends AppCompatActivity implements ActivityAdapter.O
 
     private void loadApprovedCampaignsFromDb() {
         activityList.clear();
-        Cursor cursor = dbHelper.getApprovedCampaigns();
+        Cursor cursor = null; // Initialize cursor to null
+        try { // Add try-finally block for cursor management
+            cursor = dbHelper.getApprovedCampaigns();
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_TITLE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DESCRIPTION));
-                String location = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_LOCATION));
-                String date = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DATE)); // Corrected typo here
-                String imageUriStringFromDb = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_IMAGE_URI));
-                double targetDonation = cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DONATION_GOAL));
-                int currentDonationFromDb = cursor.getInt(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_CURRENT_DONATION));
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    // Fetch all necessary columns from DBHelper for campaigns
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_TITLE));
+                    String description = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DESCRIPTION));
+                    String location = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_LOCATION));
+                    String date = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DATE));
+                    String imageUriStringFromDb = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_IMAGE_URI));
+                    double targetDonation = cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_DONATION_GOAL));
+                    // Assuming current donation is stored as REAL or INTEGER, getDouble for flexibility
+                    double currentDonationFromDb = cursor.getDouble(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_CURRENT_DONATION));
 
+                    // MODIFIED: Fetch contactEmail and paypalUrl
+                    String contactEmail = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_CONTACT_EMAIL));
+                    String paypalUrl = cursor.getString(cursor.getColumnIndexOrThrow(DBHelper.COLUMN_CAMPAIGN_PAYPAL_URL));
 
-                ActivityItem item = new ActivityItem(
-                        title,
-                        description,
-                        location,
-                        date,
-                        "Ongoing", // Status for display
-                        0,      // imageResIdForDisplay (using URI string instead, so 0 is fine as placeholder)
-                        imageUriStringFromDb,
-                        currentDonationFromDb, // Use actual current donation
-                        targetDonation
-                );
-                activityList.add(item);
-            } while (cursor.moveToNext());
-            cursor.close();
+                    // MODIFIED: Constructor call for ActivityItem to include new fields
+                    // The order must match the ActivityItem constructor:
+                    // (title, desc, loc, date, status, imageUri, imageResId, currentDon, targetDon, contactEmail, paypalUrl)
+                    ActivityItem item = new ActivityItem(
+                            title,
+                            description,
+                            location,
+                            date,
+                            "Ongoing", // Status for display - you might want to fetch actual status if it can vary for approved items
+                            imageUriStringFromDb, // imageUriString
+                            0,      // imageResId (using URI string instead, so 0 is placeholder if not applicable)
+                            currentDonationFromDb,
+                            targetDonation,
+                            contactEmail, // new field
+                            paypalUrl     // new field
+                    );
+                    activityList.add(item);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("UserActivity", "Error loading approved campaigns from DB", e);
+        } finally {
+            if (cursor != null) {
+                cursor.close(); // Ensure cursor is closed
+            }
         }
+
 
         activityAdapter.updateList(activityList); // Update adapter with new list
 
@@ -171,7 +190,7 @@ public class UserActivity extends AppCompatActivity implements ActivityAdapter.O
         }
     }
 
-    // Updated onItemClick method
+    // MODIFIED: onItemClick method to include contactEmail and paypalUrl in intent extras
     @Override
     public void onItemClick(ActivityItem item) {
         Intent intent = new Intent(UserActivity.this, CampaignDetailActivity.class);
@@ -181,8 +200,14 @@ public class UserActivity extends AppCompatActivity implements ActivityAdapter.O
         intent.putExtra("date", item.getDate());
         intent.putExtra("imageUriString", item.getImageUriString());
         intent.putExtra("imageResId", item.getImageResId());
-        intent.putExtra("currentDonation", (double) item.getCurrentDonation());
+        intent.putExtra("currentDonation", item.getCurrentDonation()); // Passed as double
         intent.putExtra("targetDonation", item.getTargetDonation());
+
+        // ADDED: Pass contactEmail and paypalUrl to CampaignDetailActivity
+        // These getters must exist in ActivityItem.java
+        intent.putExtra("contactEmail", item.getContactEmail());
+        intent.putExtra("paypalUrl", item.getPaypalUrl());
+
         startActivity(intent);
     }
 }
