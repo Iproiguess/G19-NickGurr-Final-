@@ -111,7 +111,6 @@ public class CampaignDetailActivity extends AppCompatActivity {
             btnBack.setOnClickListener(v -> finish());
         }
 
-        // MODIFIED: OnClickListener for btnDonate - simplified
         btnDonate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,10 +136,8 @@ public class CampaignDetailActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void updateDonationUI() {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("ms", "MY"));
-        String formattedCurrentDonation = currencyFormat.format(currentDonation); // Still needed if showing current/target
         String formattedTargetDonation = currencyFormat.format(targetDonation);
 
-        // If you want only target: tvCampaignDetailDonationGoal.setText("Goal: " + formattedTargetDonation);
         tvCampaignDetailDonationGoal.setText("Goal: " + formattedTargetDonation);
     }
 

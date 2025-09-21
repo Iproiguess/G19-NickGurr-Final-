@@ -126,12 +126,7 @@ public class RequestCampaignActivity extends AppCompatActivity {
         String contactEmail = dbHelper.getUserEmail(currentUsername);
         if (contactEmail == null || contactEmail.isEmpty()) {
             Log.e("RequestCampaign", "Could not retrieve email for user: " + currentUsername + ". Campaign will be submitted without contact email.");
-            // Decide how to handle this: Proceed with a default/null, or show an error.
-            // For now, we'll proceed, but DB might require it to be non-null if schema enforces.
-            // If DB schema allows null for contact_email, this is okay. Otherwise, add a default.
-            // contactEmail = "notfound@example.com"; // Or handle as an error
             Toast.makeText(this, "Could not retrieve user email. Submitting without contact email.", Toast.LENGTH_LONG).show();
-            // If contact email is absolutely mandatory, you might want to return here.
         }
 
 
